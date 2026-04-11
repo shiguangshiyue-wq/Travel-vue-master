@@ -122,7 +122,6 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { amapAPI } from '@/api/amap'
-import { unsplashAPI } from '@/api/unsplash'
 
 const route = useRoute()
 const router = useRouter()
@@ -309,7 +308,12 @@ const loadSpotDetail = async () => {
     }
 
     // 高德有图用高德，没图兜底（不破坏界面）
-    images.value = amapImages.length ? amapImages : [
+    // images.value = amapImages.length ? amapImages : [
+    //   { url: `https://picsum.photos/800/600?random=1`, thumb: `https://picsum.photos/400/300?random=1` },
+    //   { url: `https://picsum.photos/800/600?random=2`, thumb: `https://picsum.photos/400/300?random=2` }
+    // ]
+
+    images.value = spot.photos?.map(photo => photo.url) ?? [
       { url: `https://picsum.photos/800/600?random=1`, thumb: `https://picsum.photos/400/300?random=1` },
       { url: `https://picsum.photos/800/600?random=2`, thumb: `https://picsum.photos/400/300?random=2` }
     ]

@@ -93,7 +93,7 @@ const sendMessage = async () => {
     if (city) {
       const spots = await amapAPI.searchScenicSpots('', city, 1)
       const weather = await amapAPI.getWeather(city)
-      const topSpots = spots.slice(0, 5)
+      // const topSpots = spots.slice(0, 5)
       const prompt = buildTravelPrompt(userMessage.content, city, topSpots, weather)
       response = await deepseekAPI.chat([
         { role: 'system', content: '你是一个专业的旅游助手，请根据提供的信息为用户生成详细的旅游攻略。' },

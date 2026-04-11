@@ -7,12 +7,12 @@
         <h1>发现你的下一个目的地</h1>
         <p>基于智能算法的个性化旅游推荐</p>
         <div class="search-box">
-          <input 
+          <input
             v-model="searchKeyword"
-            type="text" 
+            type="text"
             placeholder="搜索城市、景点..."
             @keyup.enter="handleSearch"
-          >
+          />
           <button @click="handleSearch">搜索</button>
         </div>
       </div>
@@ -24,37 +24,41 @@
         <h2>🎯 为你推荐</h2>
         <p>基于你的浏览和收藏历史</p>
       </div>
-      
+
       <div class="spots-grid">
-        <div 
-          v-for="spot in recommendations" 
+        <div
+          v-for="spot in recommendations"
           :key="spot.id"
           class="spot-card"
           @click="goToDetail(spot)"
         >
           <div class="card-image">
-            <img :src="spot.image || spot.photos?.[0]?.url || getPlaceholderImage()" :alt="spot.name">
+            <img
+              :src="
+                spot.image || spot.photos?.[0]?.url || getPlaceholderImage()
+              "
+              :alt="spot.name"
+            />
             <div class="match-badge" v-if="spot.score">
               {{ Math.round(spot.score * 100) }}% 匹配
             </div>
-            <button 
-              class="favorite-btn"
-              @click.stop="toggleFavorite(spot)"
-            >
-              {{ isFavorite(spot.id) ? '❤️' : '🤍' }}
+            <button class="favorite-btn" @click.stop="toggleFavorite(spot)">
+              {{ isFavorite(spot.id) ? "❤️" : "🤍" }}
             </button>
           </div>
           <div class="card-content">
             <h3>{{ spot.name }}</h3>
             <p class="location">{{ spot.address || spot.cityname }}</p>
             <div class="tags">
-              <span v-for="tag in spot.tags" :key="tag" class="tag">{{ tag }}</span>
+              <span v-for="tag in spot.tags" :key="tag" class="tag">{{
+                tag
+              }}</span>
             </div>
             <div class="stats">
               <span>⭐ {{ spot.rating || 4.5 }}</span>
               <span>💬 {{ spot.comments || 0 }} 评论</span>
             </div>
-            <p class="reason">{{ spot.reason || '热门推荐' }}</p>
+            <p class="reason">{{ spot.reason || "热门推荐" }}</p>
           </div>
         </div>
       </div>
@@ -66,16 +70,16 @@
         <h2>🔥 热门景点</h2>
         <p>大家都在看</p>
       </div>
-      
+
       <div class="spots-grid">
-        <div 
-          v-for="spot in popularSpots" 
+        <div
+          v-for="spot in popularSpots"
           :key="spot.id"
           class="spot-card"
           @click="goToDetail(spot)"
         >
           <div class="card-image">
-            <img :src="spot.image || getPlaceholderImage()" :alt="spot.name">
+            <img :src="spot.image || getPlaceholderImage()" :alt="spot.name" />
           </div>
           <div class="card-content">
             <h3>{{ spot.name }}</h3>
@@ -92,89 +96,91 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { useRecommendationStore } from '@/stores/recommendation'
-import { amapAPI } from '@/api/amap'
-import { unsplashAPI } from '@/api/unsplash'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
+import { useRecommendationStore } from "@/stores/recommendation";
+import { amapAPI } from "@/api/amap";
 
-const router = useRouter()
-const userStore = useUserStore()
-const recommendationStore = useRecommendationStore()
 
-const searchKeyword = ref('')
-const popularSpots = ref([])
-const allSpots = ref([])
+const router = useRouter();
+const userStore = useUserStore();
+const recommendationStore = useRecommendationStore();
 
-const recommendations = computed(() => recommendationStore.recommendations)
+const searchKeyword = ref("");
+const popularSpots = ref([]);
+const allSpots = ref([]);
+
+const recommendations = computed(() => recommendationStore.recommendations);
 
 const isFavorite = (spotId) => {
-  return userStore.favoriteIds.includes(spotId)
-}
+  return userStore.favoriteIds.includes(spotId);
+};
 
+// 本地自定义占位图，仅在高德没有图片时使用
 const getPlaceholderImage = () => {
-  return `https://picsum.photos/400/300?random=${Math.random()}`
+  return '/default-placeholder.jpg'   // 项目public目录下自备占位图
 }
-
 const toggleFavorite = (spot) => {
   if (isFavorite(spot.id)) {
-    userStore.removeFavorite(spot.id)
+    userStore.removeFavorite(spot.id);
   } else {
-    userStore.addFavorite(spot)
+    userStore.addFavorite(spot);
   }
-}
+};
 
 const handleSearch = () => {
   if (searchKeyword.value.trim()) {
-    userStore.addSearchHistory(searchKeyword.value)
-    router.push(`/search?q=${encodeURIComponent(searchKeyword.value)}`)
+    userStore.addSearchHistory(searchKeyword.value);
+    router.push(`/search?q=${encodeURIComponent(searchKeyword.value)}`);
   }
-}
+};
 
 const goToDetail = (spot) => {
-  router.push(`/detail/${spot.id}`)
-}
+  router.push(`/detail/${spot.id}`);
+};
 
 const loadPopularSpots = async () => {
   // 加载热门城市景点
-  const cities = ['北京', '上海', '南京', '杭州', '成都']
-  const spots = []
+  const cities = ["北京", "上海", "南京", "杭州", "成都"];
+  const spots = [];
   for (let city of cities) {
-    const results = await amapAPI.searchScenicSpots(city, city, 1)
-    spots.push(...results.slice(0, 3))
+    const results = await amapAPI.searchScenicSpots(city, city, 1);
+    spots.push(...results.slice(0, 3));
   }
-  popularSpots.value = spots
-  allSpots.value = spots
-  
+  popularSpots.value = spots;
+  allSpots.value = spots;
+
   // 获取图片
   for (let spot of spots) {
-    const images = await unsplashAPI.searchTravelImages(spot.name, 1)
-    if (images.length) {
-      spot.image = images[0].thumb
+    // 只使用高德返回的高清图片
+    if (spot.photos && spot.photos.length > 0) {
+      spot.image = spot.photos[0].url; // 高德返回的图片字段就是高清
+    } else {
+      spot.image = getPlaceholderImage(); // 本地占位符，不要用Unsplash/picsum
     }
   }
-}
+};
 
 const initRecommendations = async () => {
-  await loadPopularSpots()
-  
+  await loadPopularSpots();
+
   // 生成个性化推荐
   if (userStore.isLoggedIn && allSpots.value.length) {
-    await recommendationStore.generateRecommendations(allSpots.value)
+    await recommendationStore.generateRecommendations(allSpots.value);
   } else {
     // 未登录时显示热门推荐
-    recommendationStore.recommendations = popularSpots.value.map(spot => ({
+    recommendationStore.recommendations = popularSpots.value.map((spot) => ({
       ...spot,
       score: 0.8,
-      reason: '热门推荐'
-    }))
+      reason: "热门推荐",
+    }));
   }
-}
+};
 
 onMounted(() => {
-  initRecommendations()
-})
+  initRecommendations();
+});
 </script>
 
 <style scoped>
@@ -259,14 +265,14 @@ onMounted(() => {
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
 }
 
 .spot-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .card-image {
@@ -309,7 +315,7 @@ onMounted(() => {
   height: 36px;
   font-size: 18px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
 }
 
@@ -365,11 +371,11 @@ onMounted(() => {
   .welcome-banner {
     padding: 40px 20px;
   }
-  
+
   .welcome-banner h1 {
     font-size: 32px;
   }
-  
+
   .spots-grid {
     grid-template-columns: 1fr;
   }
