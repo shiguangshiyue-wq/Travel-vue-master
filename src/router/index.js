@@ -38,6 +38,18 @@ const routes = [
     path: '/chat',
     name: 'Chat',
     component: () => import('@/views/Chat.vue')
+  },
+  // 新增酒店预订页面
+  {
+    path: '/hotel',
+    name: 'Hotel',
+    component: () => import('@/views/Hotel.vue')
+  },
+  // 新增机票预订页面
+  {
+    path: '/flight',
+    name: 'Flight',
+    component: () => import('@/views/Flight.vue')
   }
 ]
 
@@ -46,12 +58,11 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫 - 如果未登录，重定向到首页并显示登录弹窗
+// 路由守卫
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   if (!userStore.isLoggedIn && to.path !== '/login') {
     next('/')
-    // 这里无法直接设置showLogin，但App.vue的watch会处理
   } else {
     next()
   }
